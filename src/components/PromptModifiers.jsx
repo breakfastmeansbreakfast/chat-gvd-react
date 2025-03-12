@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import { Card, Button, ToggleButtonGroup, ToggleButton, Badge, Collapse, Row, Col, ListGroup } from 'react-bootstrap';
+import { ChevronUp, ChevronDown } from 'react-bootstrap-icons';
 
 const PromptModifiers = ({ onPromptChange }) => {
-  const [selectedPlatforms, setSelectedPlatforms] = useState(new Set());
+  const [selectedPlatforms, setSelectedPlatforms] = useState([]);
   const [selectedTone, setSelectedTone] = useState('default');
   const [isOpen, setIsOpen] = useState(false);
 
@@ -25,17 +26,16 @@ const PromptModifiers = ({ onPromptChange }) => {
   }, [selectedPlatforms, selectedTone]);
 
   const togglePlatform = (platformId) => {
-    const newSelectedPlatforms = new Set(selectedPlatforms);
-    if (newSelectedPlatforms.has(platformId)) {
-      newSelectedPlatforms.delete(platformId);
+    const currentIndex = selectedPlatforms.indexOf(platformId);
+    const newSelectedPlatforms = [...selectedPlatforms];
+    
+    if (currentIndex === -1) {
+      newSelectedPlatforms.push(platformId);
     } else {
-      newSelectedPlatforms.add(platformId);
+      newSelectedPlatforms.splice(currentIndex, 1);
     }
+    
     setSelectedPlatforms(newSelectedPlatforms);
-  };
-
-  const setTone = (toneId) => {
-    setSelectedTone(toneId);
   };
 
   const updatePromptInstructions = () => {
@@ -58,83 +58,87 @@ const PromptModifiers = ({ onPromptChange }) => {
     onPromptChange(instructions);
   };
 
-  const hasActiveModifiers = selectedPlatforms.size > 0 || selectedTone !== 'default';
+  const hasActiveModifiers = selectedPlatforms.length > 0 || selectedTone !== 'default';
+  const activeModifiersCount = selectedPlatforms.length + (selectedTone !== 'default' ? 1 : 0);
 
   return (
-    <div className="card mb-6 overflow-hidden">
-      <div 
-        className="flex justify-between items-center cursor-pointer py-2 px-3"
+    <Card className="mb-4">
+      <Card.Header 
+        className="d-flex justify-content-between align-items-center py-2 cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
+        style={{ cursor: 'pointer' }}
       >
-        <div className="flex items-center">
-          <h3 className="font-medium">Message Options</h3>
+        <div className="d-flex align-items-center">
+          <h6 className="mb-0">Message Options</h6>
           {hasActiveModifiers && (
-            <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-primary-100 text-primary-800 rounded-full">
-              {selectedPlatforms.size + (selectedTone !== 'default' ? 1 : 0)} active
-            </span>
+            <Badge bg="primary" pill className="ms-2">
+              {activeModifiersCount} active
+            </Badge>
           )}
         </div>
-        <button className="text-gray-500">
-          {isOpen ? <ChevronUpIcon className="h-5 w-5" /> : <ChevronDownIcon className="h-5 w-5" />}
-        </button>
-      </div>
+        <Button variant="link" className="p-0 text-decoration-none">
+          {isOpen ? <ChevronUp /> : <ChevronDown />}
+        </Button>
+      </Card.Header>
       
-      {isOpen && (
-        <div className="p-4 border-t">
-          <div className="mb-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Platform</h4>
-            <div className="flex flex-wrap gap-2">
-              {platforms.map((platform) => (
-                <button
-                  key={platform.id}
-                  onClick={() => togglePlatform(platform.id)}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors
-                    ${selectedPlatforms.has(platform.id)
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                  type="button"
-                >
-                  {platform.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          
-          <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Tone of Voice</h4>
-            <div className="flex flex-wrap gap-2">
-              {tones.map((tone) => (
-                <button
-                  key={tone.id}
-                  onClick={() => setTone(tone.id)}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors
-                    ${selectedTone === tone.id
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                  type="button"
-                >
-                  {tone.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {hasActiveModifiers && (
-            <div className="mt-4 text-sm text-gray-600">
-              <p>Active modifiers:</p>
-              <ul className="list-disc list-inside mt-1">
-                {Array.from(selectedPlatforms).map(id => (
-                  <li key={id}>{platforms.find(p => p.id === id)?.label} post</li>
+      <Collapse in={isOpen}>
+        <div>
+          <Card.Body>
+            <div className="mb-3">
+              <h6 className="mb-2">Platform</h6>
+              <div className="d-flex flex-wrap gap-2">
+                {platforms.map((platform) => (
+                  <Button
+                    key={platform.id}
+                    variant={selectedPlatforms.includes(platform.id) ? "primary" : "outline-secondary"}
+                    size="sm"
+                    onClick={() => togglePlatform(platform.id)}
+                    className="rounded-pill"
+                  >
+                    {platform.label}
+                  </Button>
                 ))}
-                {selectedTone !== 'default' && (
-                  <li>{tones.find(t => t.id === selectedTone)?.label} tone</li>
-                )}
-              </ul>
+              </div>
             </div>
-          )}
+            
+            <div>
+              <h6 className="mb-2">Tone of Voice</h6>
+              <div className="d-flex flex-wrap gap-2">
+                {tones.map((tone) => (
+                  <Button
+                    key={tone.id}
+                    variant={selectedTone === tone.id ? "primary" : "outline-secondary"}
+                    size="sm"
+                    onClick={() => setSelectedTone(tone.id)}
+                    className="rounded-pill"
+                  >
+                    {tone.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {hasActiveModifiers && (
+              <div className="mt-3 small">
+                <p className="mb-1">Active modifiers:</p>
+                <ListGroup variant="flush" className="small">
+                  {selectedPlatforms.map(id => (
+                    <ListGroup.Item key={id} className="py-1">
+                      • {platforms.find(p => p.id === id)?.label} post
+                    </ListGroup.Item>
+                  ))}
+                  {selectedTone !== 'default' && (
+                    <ListGroup.Item className="py-1">
+                      • {tones.find(t => t.id === selectedTone)?.label} tone
+                    </ListGroup.Item>
+                  )}
+                </ListGroup>
+              </div>
+            )}
+          </Card.Body>
         </div>
-      )}
-    </div>
+      </Collapse>
+    </Card>
   );
 };
 

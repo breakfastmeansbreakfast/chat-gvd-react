@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
+import { Card, Button, Form, ProgressBar, Alert, Collapse, Row, Col } from 'react-bootstrap';
+import { ChevronUp, ChevronDown, FileEarmarkArrowUp } from 'react-bootstrap-icons';
 import { uploadDocument } from '../services/apiService';
-import { ChevronUpIcon, ChevronDownIcon, DocumentArrowUpIcon } from '@heroicons/react/24/solid';
 
 function FileUpload({ onUploadComplete }) {
   const [file, setFile] = useState(null);
@@ -85,109 +86,112 @@ function FileUpload({ onUploadComplete }) {
   };
 
   return (
-    <div className="card mb-6 overflow-hidden">
-      <div 
-        className="flex justify-between items-center cursor-pointer py-2 px-3"
+    <Card className="mb-4">
+      <Card.Header 
+        className="d-flex justify-content-between align-items-center py-2"
         onClick={() => setIsOpen(!isOpen)}
+        style={{ cursor: 'pointer' }}
       >
-        <h3 className="font-medium">Upload Documents</h3>
-        <button className="text-gray-500" type="button">
-          {isOpen ? <ChevronUpIcon className="h-5 w-5" /> : <ChevronDownIcon className="h-5 w-5" />}
-        </button>
-      </div>
+        <h6 className="mb-0">Upload Documents</h6>
+        <Button variant="link" className="p-0 text-decoration-none">
+          {isOpen ? <ChevronUp /> : <ChevronDown />}
+        </Button>
+      </Card.Header>
       
-      {isOpen && (
-        <div className="p-4 border-t">
-          <div 
-            className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center"
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-          >
-            <DocumentArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
-            
-            <p className="mt-2 text-sm text-gray-600">
-              Drag and drop a file here, or{' '}
-              <button 
-                type="button"
-                className="text-primary-600 hover:text-primary-500 font-medium"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                browse
-              </button>
-            </p>
-            
-            <p className="mt-1 text-xs text-gray-500">
-              PDF, TXT, CSV, or other text documents (max. 10MB)
-            </p>
-            
-            <input
-              ref={fileInputRef}
-              type="file"
-              className="hidden"
-              onChange={handleFileChange}
-              accept=".pdf,.txt,.csv,.doc,.docx,.md"
-            />
-          </div>
-          
-          {file && (
-            <div className="mt-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-900">{file.name}</span>
-                <span className="text-sm text-gray-500">{(file.size / 1024).toFixed(0)} KB</span>
-              </div>
+      <Collapse in={isOpen}>
+        <div>
+          <Card.Body>
+            <div 
+              className="border border-2 border-dashed rounded p-4 text-center mb-3"
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              style={{ borderStyle: 'dashed' }}
+            >
+              <FileEarmarkArrowUp size={48} className="text-secondary mb-2" />
               
-              {uploading && (
-                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                  <div 
-                    className="bg-primary-600 h-2.5 rounded-full transition-all duration-300" 
-                    style={{ width: `${uploadProgress}%` }}
-                  ></div>
+              <p className="mb-1">
+                Drag and drop a file here, or{' '}
+                <Button 
+                  variant="link"
+                  className="p-0 text-decoration-none"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  browse
+                </Button>
+              </p>
+              
+              <small className="text-muted">
+                PDF, TXT, CSV, or other text documents (max. 10MB)
+              </small>
+              
+              <Form.Control
+                ref={fileInputRef}
+                type="file"
+                className="d-none"
+                onChange={handleFileChange}
+                accept=".pdf,.txt,.csv,.doc,.docx,.md"
+              />
+            </div>
+            
+            {file && (
+              <div>
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <span className="fw-medium">{file.name}</span>
+                  <small className="text-muted">{(file.size / 1024).toFixed(0)} KB</small>
                 </div>
-              )}
-              
-              <div className="mt-4 flex justify-end">
-                <button
-                  type="button"
-                  className="btn btn-secondary mr-2"
-                  onClick={() => {
-                    setFile(null);
-                    if (fileInputRef.current) {
-                      fileInputRef.current.value = '';
-                    }
-                    setError('');
-                    setSuccess('');
-                  }}
-                  disabled={uploading}
-                >
-                  Cancel
-                </button>
                 
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleUpload}
-                  disabled={uploading}
-                >
-                  {uploading ? 'Uploading...' : 'Upload'}
-                </button>
+                {uploading && (
+                  <ProgressBar 
+                    now={uploadProgress} 
+                    className="mb-3" 
+                    animated={uploadProgress < 100}
+                  />
+                )}
+                
+                <div className="d-flex justify-content-end gap-2">
+                  <Button
+                    variant="outline-secondary"
+                    size="sm"
+                    onClick={() => {
+                      setFile(null);
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = '';
+                      }
+                      setError('');
+                      setSuccess('');
+                    }}
+                    disabled={uploading}
+                  >
+                    Cancel
+                  </Button>
+                  
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={handleUpload}
+                    disabled={uploading}
+                  >
+                    {uploading ? 'Uploading...' : 'Upload'}
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
-          
-          {error && (
-            <div className="mt-4 text-sm text-red-600">
-              {error}
-            </div>
-          )}
-          
-          {success && (
-            <div className="mt-4 text-sm text-green-600">
-              {success}
-            </div>
-          )}
+            )}
+            
+            {error && (
+              <Alert variant="danger" className="mt-3 py-2 small">
+                {error}
+              </Alert>
+            )}
+            
+            {success && (
+              <Alert variant="success" className="mt-3 py-2 small">
+                {success}
+              </Alert>
+            )}
+          </Card.Body>
         </div>
-      )}
-    </div>
+      </Collapse>
+    </Card>
   );
 }
 

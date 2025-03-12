@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
-import { fetchStatus } from './services/apiService'
-import Header from './components/Header'
-import StatusBar from './components/StatusBar'
-import ChatInterface from './components/ChatInterface'
-import './App.css'
+import { useState, useEffect } from 'react';
+import { Container, Row, Col } from 'react-bootstrap';
+import { fetchStatus } from './services/apiService';
+import Header from './components/Header';
+import StatusBar from './components/StatusBar';
+import ChatInterface from './components/ChatInterface';
 
 function App() {
   const [systemStatus, setSystemStatus] = useState({
@@ -36,23 +36,25 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="app-container">
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-6 max-w-4xl">
-        <StatusBar 
-          trelloConnected={systemStatus.trello} 
-          documentsLoaded={systemStatus.documents}
-          lastSync={systemStatus.lastSync}
-          documentCount={systemStatus.documentCount}
-          loading={loading}
-        />
-        <ChatInterface />
+      <main className="main-content py-4">
+        <Container className="px-3">
+          <StatusBar 
+            trelloConnected={systemStatus.trello} 
+            documentsLoaded={systemStatus.documents}
+            lastSync={systemStatus.lastSync}
+            documentCount={systemStatus.documentCount}
+            loading={loading}
+          />
+          <ChatInterface />
+        </Container>
       </main>
-      <footer className="bg-gray-100 py-4 text-center text-gray-600 text-sm">
-        <p>© {new Date().getFullYear()} Golden Valley AI Assistant</p>
+      <footer className="bg-light py-3 text-center text-muted">
+        <p className="small mb-0">© {new Date().getFullYear()} Golden Valley AI Assistant</p>
       </footer>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

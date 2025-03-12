@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { Card, Row, Col, Button, Badge, Spinner } from 'react-bootstrap';
+import { ArrowClockwise } from 'react-bootstrap-icons';
 import { syncTrello } from '../services/apiService';
-import { ArrowPathIcon } from '@heroicons/react/24/solid';
 
 function StatusBar({ trelloConnected, documentsLoaded, lastSync, documentCount, loading }) {
   const [syncing, setSyncing] = useState(false);
@@ -28,52 +29,75 @@ function StatusBar({ trelloConnected, documentsLoaded, lastSync, documentCount, 
   };
 
   return (
-    <div className="card mb-6">
-      <h2 className="text-lg font-semibold mb-2">System Status</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="flex items-center">
-          <div className={`w-3 h-3 rounded-full mr-2 ${trelloConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-          <span>Trello: {trelloConnected ? 'Connected' : 'Disconnected'}</span>
-        </div>
+    <Card className="mb-4">
+      <Card.Body>
+        <h5 className="mb-3">System Status</h5>
         
-        <div className="flex items-center">
-          <div className={`w-3 h-3 rounded-full mr-2 ${documentsLoaded ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-          <span>Documents: {documentsLoaded ? `${documentCount} loaded` : 'None'}</span>
-        </div>
-        
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className={`w-3 h-3 rounded-full mr-2 ${lastSync ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-            <span>Last Sync: {loading ? 'Loading...' : formatLastSync(lastSync)}</span>
-          </div>
+        <Row className="mb-2">
+          <Col xs={12} md={4} className="mb-2 mb-md-0 d-flex align-items-center">
+            <Badge 
+              bg={trelloConnected ? "success" : "danger"} 
+              className="me-2"
+              style={{ width: "10px", height: "10px", padding: 0, borderRadius: "50%" }}
+            />
+            <span>Trello: {trelloConnected ? 'Connected' : 'Disconnected'}</span>
+          </Col>
           
-          <button 
-            onClick={handleSyncClick}
-            disabled={syncing || loading}
-            className="btn btn-secondary text-sm py-1 flex items-center"
-          >
-            {syncing ? (
-              <>
-                <ArrowPathIcon className="w-4 h-4 mr-1 animate-spin" />
-                Syncing...
-              </>
-            ) : (
-              <>
-                <ArrowPathIcon className="w-4 h-4 mr-1" />
-                Sync Now
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-      
-      {syncMessage && (
-        <div className={`mt-2 text-sm ${syncMessage.includes('failed') ? 'text-red-600' : 'text-green-600'}`}>
-          {syncMessage}
-        </div>
-      )}
-    </div>
+          <Col xs={12} md={4} className="mb-2 mb-md-0 d-flex align-items-center">
+            <Badge 
+              bg={documentsLoaded ? "success" : "warning"} 
+              className="me-2"
+              style={{ width: "10px", height: "10px", padding: 0, borderRadius: "50%" }}
+            />
+            <span>Documents: {documentsLoaded ? `${documentCount} loaded` : 'None'}</span>
+          </Col>
+          
+          <Col xs={12} md={4} className="d-flex align-items-center justify-content-between">
+            <div className="d-flex align-items-center">
+              <Badge 
+                bg={lastSync ? "success" : "warning"} 
+                className="me-2"
+                style={{ width: "10px", height: "10px", padding: 0, borderRadius: "50%" }}
+              />
+              <span>Last Sync: {loading ? 'Loading...' : formatLastSync(lastSync)}</span>
+            </div>
+            
+            <Button 
+              variant="outline-secondary"
+              size="sm"
+              onClick={handleSyncClick}
+              disabled={syncing || loading}
+              className="d-flex align-items-center"
+            >
+              {syncing ? (
+                <>
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    size="sm"
+                    role="status"
+                    aria-hidden="true"
+                    className="me-1"
+                  />
+                  <span>Syncing...</span>
+                </>
+              ) : (
+                <>
+                  <ArrowClockwise className="me-1" />
+                  <span>Sync Now</span>
+                </>
+              )}
+            </Button>
+          </Col>
+        </Row>
+        
+        {syncMessage && (
+          <div className={`mt-2 small ${syncMessage.includes('failed') ? 'text-danger' : 'text-success'}`}>
+            {syncMessage}
+          </div>
+        )}
+      </Card.Body>
+    </Card>
   );
 }
 
